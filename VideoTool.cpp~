@@ -293,7 +293,6 @@ int main(int argc , char *argv[])
      
     char c[10] = "fslsrs"; 
     //keep communicating with server
-	int ok=1;
     while(ok==1)
     {
         //printf("Enter message : ");

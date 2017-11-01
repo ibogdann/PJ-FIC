@@ -47,10 +47,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/cloud/RoboPet/RoboPet
+CMAKE_SOURCE_DIR = /home/cloud/today/PJ-FIC
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/cloud/RoboPet/RoboPet
+CMAKE_BINARY_DIR = /home/cloud/today/PJ-FIC
 
 #=============================================================================
 # Target rules for target CMakeFiles/VideoTool.dir
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/cloud/RoboPet/RoboPet
 CMakeFiles/VideoTool.dir/all:
 	$(MAKE) -f CMakeFiles/VideoTool.dir/build.make CMakeFiles/VideoTool.dir/depend
 	$(MAKE) -f CMakeFiles/VideoTool.dir/build.make CMakeFiles/VideoTool.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/cloud/RoboPet/RoboPet/CMakeFiles  1
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/cloud/today/PJ-FIC/CMakeFiles  1
 	@echo "Built target VideoTool"
 .PHONY : CMakeFiles/VideoTool.dir/all
 
@@ -69,9 +69,9 @@ all: CMakeFiles/VideoTool.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/VideoTool.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/cloud/RoboPet/RoboPet/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/cloud/today/PJ-FIC/CMakeFiles 1
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/VideoTool.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/cloud/RoboPet/RoboPet/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/cloud/today/PJ-FIC/CMakeFiles 0
 .PHONY : CMakeFiles/VideoTool.dir/rule
 
 # Convenience name for target.
