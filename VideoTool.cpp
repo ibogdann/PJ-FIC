@@ -190,7 +190,7 @@ void  point(Mat &HSV,Mat &threshold,bool useMorphOps){
 		morphOps(threshold);
 
 }
-int xold,xnew,yold,ynew,xtarget,ytarget;  //o-old; n-new; t-target
+int xold,xnew,yold,ynew,xtarget,ytarget,turned;  //o-old; n-new; t-target
 char c[10] = "sfbrl";
 int sock;
 struct sockaddr_in server;
@@ -202,7 +202,7 @@ void win_game(){
 		if( send(sock , message , strlen(message) , 0) < 0)
         	{
             	  puts("Send failed");
-            	  return 1;
+            	  
         	}
 		sleep(1);
    }
@@ -213,27 +213,27 @@ void win_game(){
 		if( send(sock , message , strlen(message) , 0) < 0)
         	{
             	  puts("Send failed");
-            	  return 1;
+            	  
         	}
          sprintf(message,"%c",c[3]);
 		if( send(sock , message , strlen(message) , 0) < 0)
         	{
             	  puts("Send failed");
-            	  return 1;
+            	  
         	}
 		//sleep(1);
    sprintf(message,"%c",c[3]);
 		if( send(sock , message , strlen(message) , 0) < 0)
         	{
             	  puts("Send failed");
-            	  return 1;
+            	  
         	}
 		sleep(1);
    
    }
 }
 
-void send_move(char c)
+int send_move(char *c)
 {
   sprintf(message,"%c",c);
 		if( send(sock , message , strlen(message) , 0) < 0)
@@ -242,7 +242,15 @@ void send_move(char c)
             	  return 1;
         	}
 		sleep(1);
+   sprintf(message,"%c",'s');
+		if( send(sock , message , strlen(message) , 0) < 0)
+        	{
+            	  puts("Send failed");
+            	  return 1;
+        	}
+		sleep(1);
 }
+
 int main(int argc, char* argv[])
 {
 
@@ -338,6 +346,18 @@ int main(int argc, char* argv[])
 		setMouseCallback("Original Image", on_mouse, &p);
 		//delay 30ms so that screen can refresh.
 		//image will not appear without this waitKey() command
+    if(xnew!=xtarget)
+    {
+      turned=0;
+      //if(xnew<xtarget)
+        //send_move("f");
+      //else
+        //send_move("b");
+    }
+    else
+    {
+      turned=1;
+    }
 		waitKey(30);
 	}
 	return 0;
@@ -370,16 +390,16 @@ int main(int argc , char *argv[])
      
      
     //keep communicating with server
-	int ok=1;
+	  int ok=1;
     while(ok==1)
     {
-        //printf("Enter message : ");
-       // scanf("%s" , message);
-        for (int i = 0; i < strlen(c); i++)
-	{
-		cout << c[i];
-		if((c[i]=='f')||(c[i]=='s')||(c[i]=='r')||(c[i]=='l'))
-		{
+        printf("Enter message : ");
+        scanf("%s" , message);
+      //  for (int i = 0; i < strlen(c); i++)
+    //{
+		//cout << c[i];
+		//if((c[i]=='f')||(c[i]=='s')||(c[i]=='r')||(c[i]=='l'))
+		//{
 		sprintf(message,"%c",c[i]);
 		if( send(sock , message , strlen(message) , 0) < 0)
         	{
