@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/cloud/today/PJ-FIC/VideoTool.cpp
+/home/cloud/BD/PJ-FIC/VideoTool.cpp
 sstream
 -
 string
@@ -18,9 +18,9 @@ stdlib.h
 iostream
 -
 opencv2/highgui/highgui.hpp
-/home/cloud/today/PJ-FIC/opencv2/highgui/highgui.hpp
+/home/cloud/BD/PJ-FIC/opencv2/highgui/highgui.hpp
 opencv2/opencv.hpp
-/home/cloud/today/PJ-FIC/opencv2/opencv.hpp
+/home/cloud/BD/PJ-FIC/opencv2/opencv.hpp
 string.h
 -
 sys/socket.h

@@ -190,9 +190,63 @@ void  point(Mat &HSV,Mat &threshold,bool useMorphOps){
 		morphOps(threshold);
 
 }
-/*
+int xold,xnew,yold,ynew,xtarget,ytarget;  //o-old; n-new; t-target
+char c[10] = "sfbrl";
+int sock;
+struct sockaddr_in server;
+char message[1000] , server_reply[2000];
+void win_game(){
+ for (int i = 0; i < 3; i++)
+	{
+		sprintf(message,"%c",c[1]);
+		if( send(sock , message , strlen(message) , 0) < 0)
+        	{
+            	  puts("Send failed");
+            	  return 1;
+        	}
+		sleep(1);
+   }
+   
+   while(1)
+   {
+     sprintf(message,"%c",c[1]);
+		if( send(sock , message , strlen(message) , 0) < 0)
+        	{
+            	  puts("Send failed");
+            	  return 1;
+        	}
+         sprintf(message,"%c",c[3]);
+		if( send(sock , message , strlen(message) , 0) < 0)
+        	{
+            	  puts("Send failed");
+            	  return 1;
+        	}
+		//sleep(1);
+   sprintf(message,"%c",c[3]);
+		if( send(sock , message , strlen(message) , 0) < 0)
+        	{
+            	  puts("Send failed");
+            	  return 1;
+        	}
+		sleep(1);
+   
+   }
+}
+
+void send_move(char c)
+{
+  sprintf(message,"%c",c);
+		if( send(sock , message , strlen(message) , 0) < 0)
+        	{
+            	  puts("Send failed");
+            	  return 1;
+        	}
+		sleep(1);
+}
 int main(int argc, char* argv[])
 {
+
+  
 
 	//some boolean variables for different functionality within this
 	//program
@@ -222,12 +276,8 @@ int main(int argc, char* argv[])
 	//all of our operations will be performed within this loop
 
 
-
-
-	while (1) {
-
-
-		//store image to matrix
+//first of all take initial coords
+    //store image to matrix
 		capture.read(cameraFeed);
 		//convert frame from BGR to HSV colorspace
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
@@ -243,15 +293,44 @@ int main(int argc, char* argv[])
 		//filtered object
 		//point(HSV,threshold,useMorphOps);
 		if (trackObjects){
-			
 			trackFilteredObject(x, y, threshold, cameraFeed);
-
 		}
+   xold=x;
+   yold=y;
+
+	while (1) {
+    xold=xnew;
+    yold=ynew;
+		//store image to matrix
+		capture.read(cameraFeed);
+    if(cameraFeed.empty())continue;
+		//convert frame from BGR to HSV colorspace
+		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
+		//filter HSV image between values and store filtered image to
+		//threshold matri
+		inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
+		//perform morphological operations on thresholded image to eliminate noise
+		//and emphasize the filtered object(s)
+		if (useMorphOps)
+			morphOps(threshold);
+		//pass in thresholded frame to our object tracking function
+		//this function will return the x and y coordinates of the
+		//filtered object
+		//point(HSV,threshold,useMorphOps);
+		if (trackObjects){
+			trackFilteredObject(x, y, threshold, cameraFeed);
+		}
+    xnew=x;
+    ynew=y;
+    printf("%d,%d\n",x,y);
 		inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);
 		if(useMorphOps)
 			morphOps(threshold);
 		if(trackObjects2)
 			trackFilteredObject(x,y,threshold,cameraFeed);
+    xtarget=x;
+    ytarget=y;
+    printf("%d,%d\n\n\n",x,y); 
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
@@ -263,12 +342,10 @@ int main(int argc, char* argv[])
 	}
 	return 0;
 }
-*/
+/*
 int main(int argc , char *argv[])
 {
-    int sock;
-    struct sockaddr_in server;
-    char message[1000] , server_reply[2000];
+    
      
     //Create socket
     sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -291,7 +368,7 @@ int main(int argc , char *argv[])
      
     puts("Connected\n");
      
-    char c[10] = "fslsrs"; 
+     
     //keep communicating with server
 	int ok=1;
     while(ok==1)
@@ -319,3 +396,4 @@ int main(int argc , char *argv[])
     //close(sock);
     return 0;
 }
+*/
