@@ -17,12 +17,22 @@ using namespace std;
 using namespace cv;
 //initial min and max HSV filter values.
 //these will be changed using trackbars
-int H_MIN = 0;
+/*int H_MIN = 0;
 int H_MAX = 256;
 int S_MIN = 0;
 int S_MAX = 256;
 int V_MIN = 0;
+int V_MAX = 256;*/
+
+int H_MIN = 29;
+int H_MAX = 256;
+int S_MIN = 65;
+int S_MAX = 256;
+int V_MIN = 165;
 int V_MAX = 256;
+// 145 H value and 35 S value for pink only
+// 21 H and 65 S and 165 V for pink and yellow
+
 //default capture width and height
 const int FRAME_WIDTH = 640;
 const int FRAME_HEIGHT = 480;
@@ -305,7 +315,7 @@ int main(int argc, char* argv[])
 		}
    xold=x;
    yold=y;
-
+boolean pink = true;
 	while (1) {
     xold=xnew;
     yold=ynew;
@@ -316,9 +326,20 @@ int main(int argc, char* argv[])
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
 		//threshold matri
-		inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
+		//inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
+		inRange(HSV, Scalar(H_MIN, H_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
 		//perform morphological operations on thresholded image to eliminate noise
 		//and emphasize the filtered object(s)
+		
+		/*
+		if (pink){
+			inRange(HSV, Scalar(144, 35, 0), Scalar(H_MAX, S_MAX, V_MAX), threshold);
+			pink = false;
+		}else{
+			pink = true;
+			inRange(HSV, Scalar(21, 65, 165), Scalar(H_MAX, S_MAX, V_MAX), threshold);
+		}
+*/
 		if (useMorphOps)
 			morphOps(threshold);
 		//pass in thresholded frame to our object tracking function
@@ -331,7 +352,7 @@ int main(int argc, char* argv[])
     xnew=x;
     ynew=y;
     printf("%d,%d\n",x,y);
-		inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);
+		/*inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);
 		if(useMorphOps)
 			morphOps(threshold);
 		if(trackObjects2)
@@ -339,7 +360,7 @@ int main(int argc, char* argv[])
     xtarget=x;
     ytarget=y;
     printf("%d,%d\n\n\n",x,y); 
-		//show frames
+		//show frames*/
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
 		//imshow(windowName1, HSV);
