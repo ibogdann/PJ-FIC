@@ -17,19 +17,19 @@ using namespace std;
 using namespace cv;
 //initial min and max HSV filter values.
 //these will be changed using trackbars
-/*int H_MIN = 0;
+int H_MIN = 0;
 int H_MAX = 256;
 int S_MIN = 0;
 int S_MAX = 256;
 int V_MIN = 0;
-int V_MAX = 256;*/
+int V_MAX = 256;
 
-int H_MIN = 29;
+/*int H_MIN = 29;
 int H_MAX = 256;
 int S_MIN = 65;
 int S_MAX = 256;
 int V_MIN = 165;
-int V_MAX = 256;
+int V_MAX = 256;*/
 // 145 H value and 35 S value for pink only
 // 21 H and 65 S and 165 V for pink and yellow
 
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
 	//start an infinite loop where webcam feed is copied to cameraFeed matrix
 	//all of our operations will be performed within this loop
 
-
+/*
 //first of all take initial coords
     //store image to matrix
 		capture.read(cameraFeed);
@@ -301,7 +301,8 @@ int main(int argc, char* argv[])
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
 		//threshold matri
-		inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
+		//inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold); //THIS IS OLD
+    inRange(HSV, Scalar(144, 35, 0), Scalar(H_MAX, S_MAX, V_MAX), threshold);
 		//perform morphological operations on thresholded image to eliminate noise
 		//and emphasize the filtered object(s)
 		if (useMorphOps)
@@ -313,9 +314,12 @@ int main(int argc, char* argv[])
 		if (trackObjects){
 			trackFilteredObject(x, y, threshold, cameraFeed);
 		}
+   
    xold=x;
    yold=y;
-boolean pink = true;
+   */
+   
+bool pink = true;
 	while (1) {
     xold=xnew;
     yold=ynew;
@@ -326,20 +330,25 @@ boolean pink = true;
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
 		//threshold matri
-		//inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold);
-		inRange(HSV, Scalar(H_MIN, H_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
+		//inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold); //used
+		inRange(HSV, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
+     
+    //inRange(HSV, Scalar(86, 86, 100), Scalar(H_MAX, S_MAX, V_MAX), threshold); //BoIg -1 roz
+    
+   // inRange(HSV, Scalar(1, 115, 150), Scalar(197, 197, 256), threshold); //BoIg -1 galben
+     
 		//perform morphological operations on thresholded image to eliminate noise
 		//and emphasize the filtered object(s)
 		
-		/*
-		if (pink){
+		
+		/*if (pink){
 			inRange(HSV, Scalar(144, 35, 0), Scalar(H_MAX, S_MAX, V_MAX), threshold);
 			pink = false;
 		}else{
 			pink = true;
 			inRange(HSV, Scalar(21, 65, 165), Scalar(H_MAX, S_MAX, V_MAX), threshold);
-		}
-*/
+		}*/
+
 		if (useMorphOps)
 			morphOps(threshold);
 		//pass in thresholded frame to our object tracking function
@@ -352,7 +361,10 @@ boolean pink = true;
     xnew=x;
     ynew=y;
     printf("%d,%d\n",x,y);
-		/*inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);
+		//inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);THIS IS OLD
+    //inRange(HSV, Scalar(21, 65, 165), Scalar(H_MAX, S_MAX, V_MAX), threshold); //used
+    
+    //inRange(HSV, Scalar(1, 115, 150), Scalar(197, 197, 256), threshold); //BoIg -1 galben
 		if(useMorphOps)
 			morphOps(threshold);
 		if(trackObjects2)
@@ -383,7 +395,22 @@ boolean pink = true;
 	}
 	return 0;
 }
+*/
 /*
+//pseudocode
+General idea: small movements(hold the given command for one second) in order to calibrate
+*Implement:
+  function to calculate point difference
+Calibration idea: Solve one axis(variation becomes 0) ex for OX. Then move robot until you arrive at enemy coordinates.
+*Implement:
+  Function to solve one axis
+  Get difference from axis
+  Untill difference on axis is not 0, attempt to move on relevant direction.
+Safety:
+*Implement:
+   Function to hold robot within boundaries.
+*/
+
 int main(int argc , char *argv[])
 {
     
