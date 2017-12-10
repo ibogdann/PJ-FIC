@@ -12,6 +12,7 @@
 #include<arpa/inet.h> //inet_addr
 #include<netdb.h> //hostent
 #include <unistd.h>
+#include <math.h>
 
 using namespace std;
 using namespace cv;
@@ -200,72 +201,139 @@ void  point(Mat &HSV,Mat &threshold,bool useMorphOps){
 		morphOps(threshold);
 
 }
-int xold,xnew,yold,ynew,xtarget,ytarget,turned;  //o-old; n-new; t-target
+int xold,xnew,yold,ynew,xtarget,ytarget,turned,last_move;
 char c[10] = "sfbrl";
 int sock;
 struct sockaddr_in server;
 char message[1000] , server_reply[2000];
-void win_game(){
- for (int i = 0; i < 3; i++)
-	{
-		sprintf(message,"%c",c[1]);
-		if( send(sock , message , strlen(message) , 0) < 0)
-        	{
-            	  puts("Send failed");
-            	  
-        	}
-		sleep(1);
-   }
-   
-   while(1)
-   {
-     sprintf(message,"%c",c[1]);
-		if( send(sock , message , strlen(message) , 0) < 0)
-        	{
-            	  puts("Send failed");
-            	  
-        	}
-         sprintf(message,"%c",c[3]);
-		if( send(sock , message , strlen(message) , 0) < 0)
-        	{
-            	  puts("Send failed");
-            	  
-        	}
-		//sleep(1);
-   sprintf(message,"%c",c[3]);
-		if( send(sock , message , strlen(message) , 0) < 0)
-        	{
-            	  puts("Send failed");
-            	  
-        	}
-		sleep(1);
-   
-   }
+
+
+int send_move(char &c,int slp)
+{
+    sprintf(message,"%c",c);
+    if( send(sock , message , strlen(message) , 0) < 0)
+       	{
+           	  puts("Send failed");
+           	  return 1;
+       	}
+	sleep(slp);
 }
 
-int send_move(char *c)
+void win_game()
 {
-  sprintf(message,"%c",c);
-		if( send(sock , message , strlen(message) , 0) < 0)
-        	{
-            	  puts("Send failed");
-            	  return 1;
-        	}
-		sleep(1);
-   sprintf(message,"%c",'s');
-		if( send(sock , message , strlen(message) , 0) < 0)
-        	{
-            	  puts("Send failed");
-            	  return 1;
-        	}
-		sleep(1);
+    //backup mode: just go in loop and hope that opponent gets out by trying to hit you
+    int i=0;
+    while(i<11)
+    {
+        send_move(c[1],2);
+        send_move(c[3],2);
+        send_move(c[0],1);
+        i++;
+    }
+}
+
+
+void battle()
+{
+    //engage battle mode: go on OX untill same coords then attack
+    int dif,dir;
+    if((abs(xtarget-xnew)<10)&&(abs(ytarget-ynew)<10))
+    {
+        send_move(c[last_move],5);
+        send_move(c[0],1);
+    }
+    if(abs(xtarget-xnew)>10)
+    {
+        if(turned==1)
+        {
+            turned=0;
+            send_move(c[4],4);
+        }
+        dif=abs(xtarget-xnew);
+        dif/=10;
+        if(xtarget>xnew)
+        {
+            send_move(c[1],dif);
+            send_move(c[0],1);
+        }
+        else
+        {
+            send_move(c[2],dif);
+            send_move(c[0],1);
+        }
+    }
+    else
+    {
+        if(turned==0)
+        {
+            turned=1;
+            send_move(c[3],4);
+        }
+        else
+        {
+            dif=abs(ytarget-ynew);
+            dif/=20;
+            if(ytarget>ynew)
+            {
+                send_move(c[1],dif);
+                last_move=1;
+                send_move(c[0],1);
+            }
+            else
+            {
+                send_move(c[2],dif);
+                last_move=2;
+                send_move(c[0],1);
+            }
+        }
+    }
+}
+
+int calibrate()
+{
+    if(xold==0)
+    {
+        xold=xnew;
+        yold=ynew;
+        //last_move=1;
+        send_move(c[1],1);
+        send_move(c[0],1);
+    }
+    else
+    {
+        send_move(c[2],1);
+        send_move(c[0],1);
+        if(yold!=ynew)
+        {
+            if(xold==xnew) //it is facing up or down, need to do 90 degree turn
+            {
+                send_move(c[3],4);
+                send_move(c[3],0);
+            }
+            else
+            {
+                send_move(c[3],1); //keep moving right by little untill reach moving up/down or left/right
+                send_move(c[0],1);
+                send_move(c[1],1);
+                send_move(c[0],1);
+            }
+        }
+        else
+        {
+            if(xnew<xold) //it is facing 0, from inf to 0 need to do a 180 degree turn
+            {
+                send_move(c[3],8);
+                send_move(c[0],1);
+            }
+            return 1;
+        }
+
+    }
+    return 0;
 }
 
 int main(int argc, char* argv[])
 {
-
-  
-
 	//some boolean variables for different functionality within this
 	//program
 	bool trackObjects = true;
@@ -293,175 +361,80 @@ int main(int argc, char* argv[])
 	//start an infinite loop where webcam feed is copied to cameraFeed matrix
 	//all of our operations will be performed within this loop
 
-/*
-//first of all take initial coords
-    //store image to matrix
-		capture.read(cameraFeed);
-		//convert frame from BGR to HSV colorspace
-		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
-		//filter HSV image between values and store filtered image to
-		//threshold matri
-		//inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold); //THIS IS OLD
-    inRange(HSV, Scalar(144, 35, 0), Scalar(H_MAX, S_MAX, V_MAX), threshold);
-		//perform morphological operations on thresholded image to eliminate noise
-		//and emphasize the filtered object(s)
-		if (useMorphOps)
-			morphOps(threshold);
-		//pass in thresholded frame to our object tracking function
-		//this function will return the x and y coordinates of the
-		//filtered object
-		//point(HSV,threshold,useMorphOps);
-		if (trackObjects){
-			trackFilteredObject(x, y, threshold, cameraFeed);
-		}
-   
-   xold=x;
-   yold=y;
-   */
-   
-bool pink = true;
-	while (1) {
-    xold=xnew;
-    yold=ynew;
-		//store image to matrix
-		capture.read(cameraFeed);
-    if(cameraFeed.empty())continue;
-		//convert frame from BGR to HSV colorspace
-		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
-		//filter HSV image between values and store filtered image to
-		//threshold matri
-		//inRange(HSV, Scalar(19, 110, 0), Scalar(166,236,256), threshold); //used
-		inRange(HSV, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
-     
-    //inRange(HSV, Scalar(86, 86, 100), Scalar(H_MAX, S_MAX, V_MAX), threshold); //BoIg -1 roz
-    
-   // inRange(HSV, Scalar(1, 115, 150), Scalar(197, 197, 256), threshold); //BoIg -1 galben
-     
-		//perform morphological operations on thresholded image to eliminate noise
-		//and emphasize the filtered object(s)
-		
-		
-		/*if (pink){
-			inRange(HSV, Scalar(144, 35, 0), Scalar(H_MAX, S_MAX, V_MAX), threshold);
-			pink = false;
-		}else{
-			pink = true;
-			inRange(HSV, Scalar(21, 65, 165), Scalar(H_MAX, S_MAX, V_MAX), threshold);
-		}*/
-
-		if (useMorphOps)
-			morphOps(threshold);
-		//pass in thresholded frame to our object tracking function
-		//this function will return the x and y coordinates of the
-		//filtered object
-		//point(HSV,threshold,useMorphOps);
-		if (trackObjects){
-			trackFilteredObject(x, y, threshold, cameraFeed);
-		}
-    xnew=x;
-    ynew=y;
-    printf("%d,%d\n",x,y);
-		//inRange(HSV,Scalar(19,110,0),Scalar(256,236,256),threshold);THIS IS OLD
-    //inRange(HSV, Scalar(21, 65, 165), Scalar(H_MAX, S_MAX, V_MAX), threshold); //used
-    
-    //inRange(HSV, Scalar(1, 115, 150), Scalar(197, 197, 256), threshold); //BoIg -1 galben
-		if(useMorphOps)
-			morphOps(threshold);
-		if(trackObjects2)
-			trackFilteredObject(x,y,threshold,cameraFeed);
-    xtarget=x;
-    ytarget=y;
-    printf("%d,%d\n\n\n",x,y); 
-		//show frames*/
-		imshow(windowName2, threshold);
-		imshow(windowName, cameraFeed);
-		//imshow(windowName1, HSV);
-		setMouseCallback("Original Image", on_mouse, &p);
-		//delay 30ms so that screen can refresh.
-		//image will not appear without this waitKey() command
-    if(xnew!=xtarget)
-    {
-      turned=0;
-      //if(xnew<xtarget)
-        //send_move("f");
-      //else
-        //send_move("b");
-    }
-    else
-    {
-      turned=1;
-    }
-		waitKey(30);
-	}
-	return 0;
-}
-*/
-/*
-//pseudocode
-General idea: small movements(hold the given command for one second) in order to calibrate
-*Implement:
-  function to calculate point difference
-Calibration idea: Solve one axis(variation becomes 0) ex for OX. Then move robot until you arrive at enemy coordinates.
-*Implement:
-  Function to solve one axis
-  Get difference from axis
-  Untill difference on axis is not 0, attempt to move on relevant direction.
-Safety:
-*Implement:
-   Function to hold robot within boundaries.
-*/
-
-int main(int argc , char *argv[])
-{
-    
-     
-    //Create socket
+	//Create socket
     sock = socket(AF_INET , SOCK_STREAM , 0);
     if (sock == -1)
     {
-        printf("Could not create socket");
+        printf("Could not create socket!");
+        return 1;
     }
-    puts("Socket created");
-     
+    //puts("Socket created"); //for verification
+
+    //Connect to robot
     server.sin_addr.s_addr = inet_addr("193.226.12.217");
     server.sin_family = AF_INET;
     server.sin_port = htons( 20232 );
- 
     //Connect to remote server
     if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
     {
         perror("connect failed. Error");
         return 1;
     }
-     
-    puts("Connected\n");
-     
-     
-    //keep communicating with server
-	  int ok=1;
+    //puts("Connected\n"); for verification
+
+    int ok=1;
     while(ok==1)
     {
-        printf("Enter message : ");
-        scanf("%s" , message);
-      //  for (int i = 0; i < strlen(c); i++)
-    //{
-		//cout << c[i];
-		//if((c[i]=='f')||(c[i]=='s')||(c[i]=='r')||(c[i]=='l'))
-		//{
-		sprintf(message,"%c",c[i]);
-		if( send(sock , message , strlen(message) , 0) < 0)
-        	{
-            	  puts("Send failed");
-            	  return 1;
-        	}
-		sleep(1);
+        //store image to matrix
+        capture.read(cameraFeed);
+        if(cameraFeed.empty())continue;
+        //convert frame from BGR to HSV colorspace
+		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
+		//filter HSV image between values and store filtered image to
+		//threshold matrix
+
+		//FIRST is OUR Robot
+		inRange(HSV, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold); //to be changed with values to identify our robot
+		if (useMorphOps)
+			morphOps(threshold);
+		if (trackObjects){
+			trackFilteredObject(x, y, threshold, cameraFeed);
 		}
-	}
-        //Send some data
-        ok=0;
+        xnew=x;
+        ynew=y;
+
+        //SECOND is target Robot
+		inRange(HSV, Scalar(1, 115, 150), Scalar(197, 197, 256), threshold); //to be changed with values to identify target robot
+		if(useMorphOps)
+			morphOps(threshold);
+		if(trackObjects2)
+			trackFilteredObject(x,y,threshold,cameraFeed);
+        xtarget=x;
+        ytarget=y;
+
+        if((xtarget==0)||(xnew==0))ok=0; //one of the robots have exited the camera feed (ring) => battle has finished
+        else
+        {
+            //Battle mode: go on OX until differences are almoust 0 and then try to hit
+            battle();
+
+            //Don't care about anything anymore just enter defence mode to win the battle
+            //win_game();
+
+            //Calibrate to have the robot as we want, facing OX from 0 -> inf
+            //while(calibrate()==0)calibrate();
+        }
+
+		//show frames
+		imshow(windowName2, threshold);
+		imshow(windowName, cameraFeed);
+		//imshow(windowName1, HSV);
+		setMouseCallback("Original Image", on_mouse, &p);
+		//delay 30ms so that screen can refresh.
+		//image will not appear without this waitKey() command
+        waitKey(30);
     }
-    
-    //close(sock);
-    return 0;
+
+	close(sock); //close socket
+	return 0;
 }
-*/
