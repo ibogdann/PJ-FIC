@@ -6,17 +6,31 @@
 
 #IncludeRegexTransform: 
 
-/home/cloud/RoboPet/RoboPet/VideoTool.cpp
+/home/cloud/BD/PJ-FIC/VideoTool.cpp
 sstream
 -
 string
 -
+stdio.h
+-
+stdlib.h
+-
 iostream
 -
 opencv2/highgui/highgui.hpp
-/home/cloud/RoboPet/RoboPet/opencv2/highgui/highgui.hpp
+/home/cloud/BD/PJ-FIC/opencv2/highgui/highgui.hpp
 opencv2/opencv.hpp
-/home/cloud/RoboPet/RoboPet/opencv2/opencv.hpp
+/home/cloud/BD/PJ-FIC/opencv2/opencv.hpp
+string.h
+-
+sys/socket.h
+-
+arpa/inet.h
+-
+netdb.h
+-
+unistd.h
+-
 
 /usr/local/include/opencv/cxcore.h
 opencv2/core/core_c.h
